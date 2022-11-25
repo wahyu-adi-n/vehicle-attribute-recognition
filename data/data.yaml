@@ -1,0 +1,6 @@
+train: ./data/train/images
+val: ./data/valid/images
+
+nc: 6
+# [2, 3, 5]
+names: ['bicycle', 'bicycle-car-motorcycle-bus-truck', 'bus', 'car', 'motorbike', 'truck']
