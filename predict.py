@@ -1,6 +1,6 @@
 from pathlib import Path
 from numpy import random
-from models.experimental import attempt_load
+from models.detector.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, check_imshow, non_max_suppression, apply_classifier, \
     scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
@@ -193,8 +193,24 @@ def detect(save_img=False):
     print(f'Done. ({time.time() - t0:.3f}s)')
 
 
+def main(opt):
+    with torch.no_grad():
+        if opt.update:  # update all models (to fix SourceChangeWarning)
+            for opt.weights in ['yolov7.pt']:
+                detect()
+                strip_optimizer(opt.weights)
+        else:
+            detect()
+    
+    query_set = os.listdir('crop')
+    
+    
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+
+    # Vehicle Detector Argument
     parser.add_argument('--weights', nargs='+', type=str,
                         default='weights/yolov7.pt', help='model.pt path(s)')
     # file/folder, 0 for webcam
@@ -232,14 +248,8 @@ if __name__ == '__main__':
                         help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true',
                         help='don`t trace model')
-    opt = parser.parse_args()
-    print(opt)
-    #check_requirements(exclude=('pycocotools', 'thop'))
 
-    with torch.no_grad():
-        if opt.update:  # update all models (to fix SourceChangeWarning)
-            for opt.weights in ['yolov7.pt']:
-                detect()
-                strip_optimizer(opt.weights)
-        else:
-            detect()
+    # Vehicle Attribute Classifier Argument
+
+    opt = parser.parse_args()
+    main(opt)
