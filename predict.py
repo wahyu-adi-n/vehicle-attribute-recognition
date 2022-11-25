@@ -231,7 +231,7 @@ def main(opt):
         img = Image.open(f"crop/{image}").convert('RGB')
         class_labels, conf_score = predict_color(opt.color_model, img)
         print(
-            f"This image is predicted to {class_labels}. Conf score is {(conf_score):.2f}%")
+            f"This image [{image}] is predicted to {class_labels}. Conf score is {(conf_score):.2f}%")
 
 
 if __name__ == '__main__':
@@ -246,9 +246,9 @@ if __name__ == '__main__':
     parser.add_argument('--img-size', type=int, default=640,
                         help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float,
-                        default=0.86, help='object confidence threshold')
+                        default=0.5, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float,
-                        default=0.65, help='IOU threshold for NMS')
+                        default=0.5, help='IOU threshold for NMS')
     parser.add_argument('--device', default='',
                         help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true',
