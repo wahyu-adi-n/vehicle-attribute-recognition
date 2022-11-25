@@ -1,11 +1,16 @@
 from pathlib import Path
 from numpy import random
-from models.detector.experimental import attempt_load
+from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, check_imshow, non_max_suppression, apply_classifier, \
     scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
-
+from utils.fsl_utils import evaluate
+from config.configs import *
+from models.color_classifier.vcm import models
+from config import *
+from utils.color_utils import *
+from PIL import Image
 import argparse
 import time
 import os
@@ -193,6 +198,25 @@ def detect(save_img=False):
     print(f'Done. ({time.time() - t0:.3f}s)')
 
 
+def load_color_model(model):
+    model = models(model)
+    model.load_state_dict(torch.load(
+        COLOR_MODEL_PATH, map_location=DEVICE), strict=False)
+    model.eval()
+    return model
+
+
+def predict_color(model, image):
+    image = TRANSFORMS(image)
+    model = load_color_model(model)
+    with torch.no_grad():
+        outputs = model(image.unsqueeze(0))
+    predict = torch.softmax(outputs[0], dim=0)
+    conf_score = torch.max(predict).item()
+    class_label = decode_label(predict.argmax())
+    return class_label, conf_score*100
+
+
 def main(opt):
     with torch.no_grad():
         if opt.update:  # update all models (to fix SourceChangeWarning)
@@ -201,10 +225,13 @@ def main(opt):
                 strip_optimizer(opt.weights)
         else:
             detect()
-    
+
     query_set = os.listdir('crop')
-    
-    
+    for image in query_set:
+        img = Image.open(f"crop/{image}").convert('RGB')
+        class_labels, conf_score = predict_color(opt.color_model, img)
+        print(
+            f"This image is predicted to {class_labels}. Conf score is {(conf_score):.2f}%")
 
 
 if __name__ == '__main__':
@@ -212,7 +239,7 @@ if __name__ == '__main__':
 
     # Vehicle Detector Argument
     parser.add_argument('--weights', nargs='+', type=str,
-                        default='weights/yolov7.pt', help='model.pt path(s)')
+                        default='weights/detector.pt', help='model.pt path(s)')
     # file/folder, 0 for webcam
     parser.add_argument('--source', type=str,
                         default='inference/images', help='source')
@@ -249,7 +276,10 @@ if __name__ == '__main__':
     parser.add_argument('--no-trace', action='store_true',
                         help='don`t trace model')
 
-    # Vehicle Attribute Classifier Argument
+    # Vehicle Make Model Classifier Argument
+
+    # Vehicle Color Classifier Argument
+    parser.add_argument("--color-model", type=str, default="vcmcnn")
 
     opt = parser.parse_args()
     main(opt)
