@@ -23,11 +23,11 @@ MODEL_DIR = '.weights/fsl.pth'
 
 
 # COLOR
-COLOR_MODEL_PATH = './weights/color.pt'
+COLOR_MODEL_PATH = './weights/color_resnet.pt'
 
-TRANSFORMS = transforms = T.Compose([
+TRANSFORMS = T.Compose([
     T.Resize(size=(256, 256)),
-    T.CenterCrop(size=(224, 224)),
+    T.CenterCrop(size=(256, 256)),
     T.ToTensor()]
 )
 

@@ -7,7 +7,7 @@ from utils.general import check_img_size, check_imshow, non_max_suppression, app
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 from utils.fsl_utils import evaluate
 from config.configs import *
-from models.color_classifier.vcm import models
+from models.vcm import models
 from config import *
 from utils.color_utils import *
 from PIL import Image
@@ -193,7 +193,7 @@ def detect(save_img=False):
 
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        #print(f"Results saved to {save_dir}{s}")
+        # print(f"Results saved to {save_dir}{s}")
 
     print(f'Done. ({time.time() - t0:.3f}s)')
 
@@ -246,9 +246,9 @@ if __name__ == '__main__':
     parser.add_argument('--img-size', type=int, default=640,
                         help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float,
-                        default=0.5, help='object confidence threshold')
+                        default=0.7, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float,
-                        default=0.5, help='IOU threshold for NMS')
+                        default=0.65, help='IOU threshold for NMS')
     parser.add_argument('--device', default='',
                         help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true',
@@ -279,7 +279,7 @@ if __name__ == '__main__':
     # Vehicle Make Model Classifier Argument
 
     # Vehicle Color Classifier Argument
-    parser.add_argument("--color-model", type=str, default="vcmcnn")
+    parser.add_argument("--color-model", type=str, default="resnet50")
 
     opt = parser.parse_args()
     main(opt)
